@@ -2,6 +2,13 @@
   "name": "pulse-path",
   "version": "0.1.0",
   "private": true,
+  "workspaces": [
+    "backend"
+  ],
+  "overrides": {
+    "@nestjs/common": "12.3.2",
+    "@nestjs/core": "12.3.2"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
