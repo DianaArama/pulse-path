@@ -67,6 +67,12 @@ function parseMeasurement(value: string, unit: string, field: string): number {
   return parseNumber(match[1], field);
 }
 
+function parsePositiveMeasurement(value: string, unit: string, field: string): number {
+  const parsed = parseMeasurement(value, unit, field);
+  if (parsed <= 0) throw new Error(`${field} must be greater than zero`);
+  return parsed;
+}
+
 function parseSleepTargetMinutes(value: string): number {
   const minutes = parseNumber(value, 'sleepTarget') * 60;
   if (!Number.isSafeInteger(minutes)) {
@@ -78,8 +84,8 @@ function parseSleepTargetMinutes(value: string): number {
 export function mapProfilePrototypeToPersistence(
   record: ProfilePrototypeRecord,
 ): MappedProfilePersistence {
-  if (!Number.isSafeInteger(record.profile.age)) {
-    throw new Error('age must be an integer');
+  if (!Number.isSafeInteger(record.profile.age) || record.profile.age < 0) {
+    throw new Error('age must be a non-negative integer');
   }
 
   return {
@@ -91,10 +97,10 @@ export function mapProfilePrototypeToPersistence(
       stressLevel: record.profile.stress,
     },
     metrics: {
-      heightCm: parseMeasurement(record.bodyMetrics.height, 'cm', 'height'),
-      weightKg: parseMeasurement(record.bodyMetrics.weight, 'kg', 'weight'),
-      targetWeightKg: parseMeasurement(record.bodyMetrics.targetWeight, 'kg', 'targetWeight'),
-      restingHeartRateBpm: parseMeasurement(
+      heightCm: parsePositiveMeasurement(record.bodyMetrics.height, 'cm', 'height'),
+      weightKg: parsePositiveMeasurement(record.bodyMetrics.weight, 'kg', 'weight'),
+      targetWeightKg: parsePositiveMeasurement(record.bodyMetrics.targetWeight, 'kg', 'targetWeight'),
+      restingHeartRateBpm: parsePositiveMeasurement(
         record.bodyMetrics.restingHeartRate,
         'bpm',
         'restingHeartRate',

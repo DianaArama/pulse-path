@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { mapProfilePrototypeToPersistence } from '../../src/persistence/profile-prototype-mapper.js';
+import { replaceStressCheckInForDate } from '../../src/persistence/stress-checkin-updater.js';
 
 describe('PP0009 persistence unit behavior', () => {
   it('UT-01 maps profile mock values to canonical units', () => {
@@ -58,9 +59,50 @@ describe('PP0009 persistence unit behavior', () => {
     expect.fail('UT-02 skeleton: implement profile ownership enforcement');
   });
 
-  it('UT-03 validates reviewed numeric and categorical boundaries', () => {
-    // Given reviewed units, ranges, and category sets, when values are validated, then valid boundaries pass and invalid values are rejected.
-    expect.fail('UT-03 skeleton: implement reviewed persistence validation');
+  it('UT-03 validates reviewed numeric boundaries without closing category vocabularies', () => {
+    const valid = {
+      profile: {
+        name: 'Boundary Profile',
+        age: 0,
+        activityLevel: 'Unlisted future category',
+        primaryGoal: 'Unlisted future goal',
+        stress: 'Unlisted future stress',
+      },
+      bodyMetrics: {
+        height: '0.1 cm',
+        weight: '0.1 kg',
+        targetWeight: '0.1 kg',
+        restingHeartRate: '0.1 bpm',
+      },
+      goalSettings: {
+        dailyMovement: '0',
+        calorieTarget: '0',
+        proteinTarget: '0',
+        sleepTarget: '0',
+        stressGoal: 'Unlisted future goal',
+      },
+    };
+
+    expect(mapProfilePrototypeToPersistence(valid)).toMatchObject({
+      profile: { ageYears: 0, activityLevel: 'Unlisted future category' },
+      metrics: { heightCm: 0.1, weightKg: 0.1, targetWeightKg: 0.1, restingHeartRateBpm: 0.1 },
+      goals: {
+        dailyMovementMinutes: 0,
+        calorieTargetKcal: 0,
+        proteinTargetGrams: 0,
+        sleepTargetMinutes: 0,
+      },
+    });
+
+    expect(() => mapProfilePrototypeToPersistence({ ...valid, profile: { ...valid.profile, age: -1 } })).toThrow();
+    expect(() => mapProfilePrototypeToPersistence({ ...valid, bodyMetrics: { ...valid.bodyMetrics, height: '0 cm' } })).toThrow();
+    expect(() => mapProfilePrototypeToPersistence({ ...valid, bodyMetrics: { ...valid.bodyMetrics, weight: '0 kg' } })).toThrow();
+    expect(() => mapProfilePrototypeToPersistence({ ...valid, bodyMetrics: { ...valid.bodyMetrics, targetWeight: '0 kg' } })).toThrow();
+    expect(() => mapProfilePrototypeToPersistence({ ...valid, bodyMetrics: { ...valid.bodyMetrics, restingHeartRate: '0 bpm' } })).toThrow();
+    expect(() => mapProfilePrototypeToPersistence({ ...valid, goalSettings: { ...valid.goalSettings, dailyMovement: '-1' } })).toThrow();
+    expect(() => mapProfilePrototypeToPersistence({ ...valid, goalSettings: { ...valid.goalSettings, calorieTarget: '-1' } })).toThrow();
+    expect(() => mapProfilePrototypeToPersistence({ ...valid, goalSettings: { ...valid.goalSettings, proteinTarget: '-1' } })).toThrow();
+    expect(() => mapProfilePrototypeToPersistence({ ...valid, goalSettings: { ...valid.goalSettings, sleepTarget: '-1' } })).toThrow();
   });
 
   it('UT-04 derives nutrition totals from meal and hydration source records', () => {
@@ -70,6 +112,13 @@ describe('PP0009 persistence unit behavior', () => {
 
   it('UT-05 updates only the same-day stress check-in', () => {
     // Given check-ins on multiple dates, when one date is updated, then earlier dates remain unchanged.
-    expect.fail('UT-05 skeleton: implement dated stress check-in behavior');
+    const earlier = { recordDate: '2026-11-02', stressLevel: 'Low', energyLevel: 'High' };
+    const today = { recordDate: '2026-11-03', stressLevel: 'Medium', energyLevel: 'Medium' };
+    const updatedToday = { recordDate: '2026-11-03', stressLevel: 'High', energyLevel: 'Low' };
+
+    expect(replaceStressCheckInForDate([earlier, today], updatedToday)).toEqual([
+      earlier,
+      updatedToday,
+    ]);
   });
 });
