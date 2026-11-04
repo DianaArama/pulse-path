@@ -1,9 +1,56 @@
 import { describe, expect, it } from 'vitest';
+import { mapProfilePrototypeToPersistence } from '../../src/persistence/profile-prototype-mapper.js';
 
 describe('PP0009 persistence unit behavior', () => {
   it('UT-01 maps profile mock values to canonical units', () => {
     // Given display-unit profile fixtures, when mapped for persistence, then numeric cm/kg/bpm values are used and device statuses are excluded.
-    expect.fail('UT-01 skeleton: implement canonical profile mapping');
+    const profileRecord = {
+      id: 'alex-morgan',
+      profile: {
+        name: 'Alex Morgan',
+        age: 40,
+        activityLevel: 'Moderate',
+        primaryGoal: 'Build strength',
+        stress: 'Low',
+      },
+      bodyMetrics: {
+        height: '178 cm',
+        weight: '72 kg',
+        targetWeight: '75 kg',
+        restingHeartRate: '58 bpm',
+      },
+      goalSettings: {
+        dailyMovement: '45',
+        calorieTarget: '2300',
+        proteinTarget: '140',
+        sleepTarget: '8',
+        stressGoal: 'Low',
+      },
+      connectedDevices: [{ name: 'Fitbit', status: 'Connected' }],
+    };
+
+    expect(mapProfilePrototypeToPersistence(profileRecord)).toEqual({
+      profile: {
+        name: 'Alex Morgan',
+        ageYears: 40,
+        activityLevel: 'Moderate',
+        primaryGoal: 'Build strength',
+        stressLevel: 'Low',
+      },
+      metrics: {
+        heightCm: 178,
+        weightKg: 72,
+        targetWeightKg: 75,
+        restingHeartRateBpm: 58,
+      },
+      goals: {
+        dailyMovementMinutes: 45,
+        calorieTargetKcal: 2300,
+        proteinTargetGrams: 140,
+        sleepTargetMinutes: 480,
+        stressGoal: 'Low',
+      },
+    });
   });
 
   it('UT-02 enforces account ownership before profile data access', () => {
