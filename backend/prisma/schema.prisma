@@ -1,0 +1,88 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Account {
+  id        String    @id @default(uuid()) @db.Uuid
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  profiles  Profile[]
+
+  @@map("accounts")
+}
+
+model Profile {
+  id             String                @id @default(uuid()) @db.Uuid
+  accountId      String                @map("account_id") @db.Uuid
+  name           String                @db.Text
+  ageYears       Int                   @map("age_years") @db.SmallInt
+  activityLevel  String                @map("activity_level") @db.Text
+  primaryGoal    String                @map("primary_goal") @db.Text
+  stressLevel    String                @map("stress_level") @db.Text
+  createdAt      DateTime              @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime              @updatedAt @map("updated_at") @db.Timestamptz(3)
+  account        Account               @relation(fields: [accountId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  metrics        ProfileMetrics?
+  goals          ProfileGoal?
+  movement       MovementDailyRecord[]
+  stressCheckIns StressCheckIn[]
+
+  @@index([accountId])
+  @@map("profiles")
+}
+
+model ProfileMetrics {
+  profileId            String   @id @map("profile_id") @db.Uuid
+  heightCm             Decimal  @map("height_cm") @db.Decimal(5, 2)
+  weightKg             Decimal  @map("weight_kg") @db.Decimal(6, 2)
+  targetWeightKg       Decimal  @map("target_weight_kg") @db.Decimal(6, 2)
+  restingHeartRateBpm  Int      @map("resting_heart_rate_bpm") @db.SmallInt
+  updatedAt            DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  profile              Profile  @relation(fields: [profileId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@map("profile_metrics")
+}
+
+model ProfileGoal {
+  profileId             String   @id @map("profile_id") @db.Uuid
+  dailyMovementMinutes  Int      @map("daily_movement_minutes") @db.SmallInt
+  calorieTargetKcal     Int      @map("calorie_target_kcal")
+  proteinTargetGrams    Decimal  @map("protein_target_grams") @db.Decimal(6, 2)
+  sleepTargetMinutes    Int      @map("sleep_target_minutes") @db.SmallInt
+  stressGoal            String   @map("stress_goal") @db.Text
+  updatedAt             DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  profile               Profile  @relation(fields: [profileId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@map("profile_goals")
+}
+
+model MovementDailyRecord {
+  id           String   @id @default(uuid()) @db.Uuid
+  profileId    String   @map("profile_id") @db.Uuid
+  recordDate   DateTime @map("record_date") @db.Date
+  activeMinutes Int     @map("active_minutes")
+  profile      Profile  @relation(fields: [profileId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@unique([profileId, recordDate])
+  @@index([recordDate])
+  @@map("movement_daily_records")
+}
+
+model StressCheckIn {
+  id           String   @id @default(uuid()) @db.Uuid
+  profileId    String   @map("profile_id") @db.Uuid
+  recordDate   DateTime @map("record_date") @db.Date
+  stressLevel  String   @map("stress_level") @db.Text
+  energyLevel  String   @map("energy_level") @db.Text
+  sleepQuality String   @map("sleep_quality") @db.Text
+  profile      Profile  @relation(fields: [profileId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@unique([profileId, recordDate])
+  @@index([recordDate])
+  @@map("stress_check_ins")
+}
