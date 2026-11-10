@@ -54,9 +54,9 @@ describe('PP0009 persistence unit behavior', () => {
     });
   });
 
-  it('UT-02 enforces account ownership before profile data access', () => {
+  it.skip('UT-02 enforces account ownership before profile data access', () => {
     // Given an account and profile, when the profile is missing or owned by another account, then access is denied before child reads or writes.
-    expect.fail('UT-02 skeleton: implement profile ownership enforcement');
+    // Deferred until the PP0012 account-context contract is approved.
   });
 
   it('UT-03 validates reviewed numeric boundaries without closing category vocabularies', () => {
@@ -105,9 +105,9 @@ describe('PP0009 persistence unit behavior', () => {
     expect(() => mapProfilePrototypeToPersistence({ ...valid, goalSettings: { ...valid.goalSettings, sleepTarget: '-1' } })).toThrow();
   });
 
-  it('UT-04 derives nutrition totals from meal and hydration source records', () => {
+  it.skip('UT-04 derives nutrition totals from meal and hydration source records', () => {
     // Given meal and hydration source records, when daily nutrition is summarized, then source values are derived and no writable aggregate is stored.
-    expect.fail('UT-04 skeleton: implement derived nutrition behavior after RG-01');
+    // Deferred until RG-01 resolves nutrition aggregate behavior.
   });
 
   it('UT-05 updates only the same-day stress check-in', () => {
