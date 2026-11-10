@@ -1,19 +1,8 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
 import Link from 'next/link';
 
 import User from '@/components/ui/User';
 import './globals.css';
-
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-});
-
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
-});
 
 export const metadata: Metadata = {
   title: 'PulsePath',
@@ -68,10 +57,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang='en'
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
+    <html lang='en' className='h-full antialiased'>
       <body className='min-h-full text-[#1e1a17]'>
         <div className='min-h-screen px-3 py-3 pb-24 sm:px-4 sm:py-4 sm:pb-24 lg:px-6 lg:py-6 lg:pb-6'>
           <div className='mx-auto grid min-h-[calc(100vh-1.5rem)] max-w-[1600px] gap-4 lg:grid-cols-[96px_minmax(0,1fr)]'>
@@ -150,4 +136,3 @@ export default function RootLayout({
     </html>
   );
 }
-

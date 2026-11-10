@@ -70,7 +70,7 @@ const createCoachResponse = async (
           age: profile.age,
           activityLevel: profile.activityLevel,
           primaryGoal: profile.primaryGoal,
-          stressGoal: profile.stressGoal,
+          stressGoal: profile.stress,
         },
         metrics: dashboardMetrics,
       }),
@@ -84,7 +84,9 @@ const createCoachResponse = async (
       },
     });
 
-    const parsedResponse = JSON.parse(response.output_text) as Partial<CoachResponse>;
+    const parsedResponse = JSON.parse(
+      response.output_text,
+    ) as Partial<CoachResponse>;
 
     return Response.json({
       summary: parsedResponse.summary ?? fallbackResponse.summary,

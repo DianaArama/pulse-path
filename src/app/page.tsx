@@ -8,6 +8,7 @@ import MetricCard from '@/components/dashboard/MetricCard';
 import { activeDayMocks } from '@/data/activeDayMocks';
 import { defaultProfileRecord } from '@/data/profile';
 import type { FocusTaskItem } from '@/types/dashboard';
+import type { ProfileId } from '@/types/profile';
 import { buildDashboardMetrics } from '@/lib/dashboardUtils';
 import { useActiveProfile } from '@/lib/store/use-active-profile';
 
@@ -17,9 +18,15 @@ const focusTasks: FocusTaskItem[] = [
   { task: 'Do 5 minutes of breathing', metricId: 'stress' },
 ];
 
+function isProfileId(id: string): id is ProfileId {
+  return id in activeDayMocks;
+}
+
 export default function Home() {
   const activeProfile = useActiveProfile((state) => state.activeProfile);
-  const profileId = activeProfile?.id || 'alex-morgan';
+  const profileId = activeProfile?.id && isProfileId(activeProfile.id)
+    ? activeProfile.id
+    : 'alex-morgan';
   const activeDayData = activeDayMocks[profileId];
   const metricsWithStatus = buildDashboardMetrics(activeDayData.metricInputs);
   const averageProgress = Math.round(
@@ -183,4 +190,3 @@ export default function Home() {
     </div>
   );
 }
-
